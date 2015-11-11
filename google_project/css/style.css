@@ -1,0 +1,27 @@
+div{
+	position: relative;
+}
+
+.logo {
+	top: 200px;
+	margin: auto;
+	width: 250px;
+	border: 10px solid black;
+}
+
+ul{
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	border: 10px solid black;
+}
+li {
+	float:left;
+	direction: rtl;
+}
+a{
+	display: block;
+	width: 60px;
+	direction: rtl;
+}
