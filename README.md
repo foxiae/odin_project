@@ -1,5 +1,5 @@
 #Projects from the The Odin Project:
-##Google Homepage
+##1. [Google Homepage] (https://github.com/foxiae/odin_project/tree/master/google_project)
 Mock of Google's homepage
 Project 1 for Odin Project's Wed Development 101.
 
