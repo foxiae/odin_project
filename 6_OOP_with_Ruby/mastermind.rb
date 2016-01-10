@@ -12,28 +12,38 @@ module Game
 
 	class Move
 		#checks input from player/computer
-		#prints board
+		#prints boardbut 
 		#tracks turns
-		attr_reader :turn, :result
+		attr_reader :result
+		attr_accessor :turn_num
 
-		def initialize
-			@turn = 0
+		def initialize (turn_num = 0)
+			@turn_num = turn_num
 		end
 
 		def check_input(code, input)
 			@result = Array.new
 			code.each_index do |x| 
 				if code[x] == input[x] 
-					result << "R"
+					@result << "R"
 				else
-					result << "W"
+					@result << "W"
 				end
 			end
-			turn += 1
-			turns_left = 12 - turn
-			puts "Your guess results: #{result}. You have #{turns_left} "
-		end
+    	end
 
+		def turn
+		    @turn_num += 1
+		    @turns_left = 12 - @turn_num
+		    message
+		end
+		
+		def message
+		    puts "Guess results: #{@result}."
+			puts "You have #{@turns_left} turns left."
+			puts "-----------------------------"
+		end
+		
 		def game_over
 			return :winner if winner?
 			return :loser if loser?
@@ -43,12 +53,12 @@ module Game
 		private
 
 		def winner?
-			return true if result == ["R", "R", "R", "R"]
+			return true if @result == ["R", "R", "R", "R"]
 			false
 		end
 
 		def loser?
-			return true if turn == 11
+			return true if @turn_num == 12
 			false
 		end
 	end
@@ -89,7 +99,7 @@ module Mastermind
 		end
 
 		def check
-
+			
 		end
 	end
 
