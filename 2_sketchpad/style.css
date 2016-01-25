@@ -1,0 +1,26 @@
+/*Buttons: Clear and New Grid*/
+button{
+	margin: auto;
+	margin-left: 10px;
+	width: 60px;
+}
+
+div #new{
+	display: block;
+}
+
+/* Grid Divs*/
+.container{
+	width: 600px;
+	height: 600px;
+	margin: auto;
+	margin-top: 40px;
+	border: 1px solid #e0e0e0;
+}
+
+div div{
+	border: 1px solid #f0f0f0;
+	width: 35px;
+	height: 35px;
+	float: left;
+}

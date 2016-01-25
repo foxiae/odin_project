@@ -1,0 +1,172 @@
+/* globals */
+body{
+	margin:0;
+}
+
+div{
+	width: 100%;
+}
+
+ul{
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+li{
+	display: inline;
+	padding: 10px;
+}
+
+a{
+	text-decoration: none;
+	color: #666;
+	font-family: arial,sans-serif;
+	font-size: small;
+}
+
+a:hover{
+	text-decoration: underline;
+}
+
+
+/* Header*/
+.navbar {
+	width: 100%;
+	position: absolute;
+	top: 20px;
+	margin: 0;
+	
+}
+
+.nav, .footer-right{
+	float: right;
+	padding-right: 30px;
+}
+
+
+#sign-in{
+	border-radius: 3.5px;
+	border: 3px solid #4285f4;
+	background: #4387fd;
+	font-weight: bold;
+	padding: 5px 12px 5px 12px;
+	color: #fff;
+}
+
+#sign-in:hover{
+	text-decoration: none;
+}
+
+#sign-in:active{
+	border-top: 3px solid #2a77fd;
+	border-left: 0;
+	border-right: 0;
+	border-bottom: 0;
+	padding: 5px 15px 8px 15px;
+	background: -webkit-linear-gradient(#4285f4, #023ea7); /* For Safari 5.1 to 6.0 */
+	background: -o-linear-gradient(#4285f4, #023ea7); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(#4285f4, #023ea7); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(#4285f4, #0250d9);
+}
+
+
+/* Body: Google image, search bar*/
+.content {
+	top: 200px;
+	margin: auto;
+	width: 280px;
+	position: relative;
+}
+
+.search-bar{
+	width: 500px;
+	margin-left: -125px;
+	margin-top: 15px;
+	margin-bottom: 30px;
+	position: relative;
+	height: 35px;
+	border: 1px solid #d9d9d9;
+}
+
+.search-bar input{
+	width: 498px;
+	height: 31px;
+	padding: 5px 10x 5px 10px;
+	float:left;
+	font-style: italic;
+	font-family: arial, sans-serif;
+	color: #757575;
+	border: 1px solid white;
+}
+
+
+#voice{
+	background: url('../images/voice.png');
+	display: inline-block;
+	width: 16px;
+	height: 22px;
+	background-repeat: no-repeat;
+	float: right;
+	right: 15px;
+	top: -29px;
+	position: relative;
+}
+
+.search:hover{
+	border: 1px solid #a0a0a0;
+}
+
+.button{
+	margin-left: 10px;
+	height: 30px;
+	min-width: 54px;
+	background-color: #f2f2f2;
+	background: -webkit-linear-gradient(#f2f2f2, #e4e4e4); /* For Safari 5.1 to 6.0 */
+	background: -o-linear-gradient(#f2f2f2, #e4e4e4); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(#f2f2f2, #e4e4e4); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(#f2f2f2, #e4e4e4);
+	border: 1px solid #f2f2f2;
+	color: #757575;
+	font-family: arial, sans-serif;
+	font-size: 13px;
+	font-weight: bold;
+}
+
+.button:hover{
+	border: 1.5px solid #e4e4e4;
+}
+
+#options{
+	background: url('../images/options.png');
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	background-repeat: no-repeat;
+}
+
+#options:hover{
+	background: url('../images/options_hover.png');
+	width: 18px;
+	height: 18px;
+	background-repeat: no-repeat;
+}
+
+/*Footer*/
+.footer{
+	position: absolute;
+	bottom: 0%;
+	width: 100%;
+	background: #f2f2f2;
+	border-top: 1px solid #e4e4e4;
+	line-height: 40px;
+	margin: 0;
+	padding: 0;
+}
+
+
+.footer-left{
+	float: left;
+}
+
+
