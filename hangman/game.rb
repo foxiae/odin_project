@@ -1,11 +1,13 @@
 class Game
-  def initialize(word_list = Array.new)
+  def initialize(word_list = Array.new, message = Message.new)
     @word_list = word_list
     @words = File.readlines "5desk.txt"
     @guess = ""
     @hang_board = Array.new
     @turn = 0
+    @turn_num = 13
     @game_over = false
+    @message = message
   end
 
   def create_word_list
@@ -26,8 +28,7 @@ class Game
   def user_input
     @guess = gets.chomp
     if @guess.length >= 2
-      puts "Sorry, you can only input one letter."
-      puts "Try again: "
+      @message.user_input
       @guess = gets.chomp
     end
   end
@@ -52,71 +53,111 @@ class Game
   end
 
   def turn
-    puts "Insert guess:"
+    @message.turn
     user_input
     check(@guess, @hang_word)
-    puts results
+    @message.line
+    puts "Your results: " + results
     @turn += 1
-    puts "You have #{10-@turn} turns left."
-  end
-
-  def game_over
-    win if winner?
-    lose if loser?
+    puts "You have #{@turn_num-@turn} turns left."
+    @message.line
   end
 
   def win
-    puts "Congratulations! You guessed the word! Want to play again? [Y/n]"
+    @message.win
     play_again
   end
 
   def lose
-    puts "Ouch, it looks like you're out of turns. Want to play again? [Y/n]"
+    @message.lose
     play_again
   end
 
   def play_again
       answer = gets.chomp
       if answer.casecmp("y") == 0
-        play
-      elsif answer.cas("n") == 0
+        new_game
+      else
         puts "Well, maybe later!"
     end
   end
 
   def strip_hang_board
-    @strip_board = @hang_board.collect{|c| c.strip}.to_s
+    @strip_board = @hang_board.collect{|c| c.strip}
   end
 
-  def play
-    create_word_list
-    random_word
-    hangman_board
-    puts @hang_word.join
-    10.times do
+  def new_game
+    @hang_board = Array.new
+    @strip_board = Array.new
+    play
+  end
+
+  def in_game
+    @turn_num.times do
       if @hang_word == @strip_board
         win
+        break
+      elsif @turn_num == 0
+        lose
+        break
       else
         turn
         strip_hang_board
       end
-      #lose
-      puts "board: " + @strip_board
-      puts "word: " + @hang_word.to_s
-      puts @strip_board === @hang_word
-      #puts @hang_word.casecmp(@hang_board)
     end
+
   end
 
-  def winner?
-    return @game_over = true if @hang_word == @hang_board
+  def play
+    @message.welcome_message
+    create_word_list
+    random_word
+    hangman_board
+    #puts @hang_word.join
+    in_game
+  end
+end
+
+class Message
+  def initialize
+    @message = Array.new
   end
 
-  def loser?
-    return @game_over = true if @turn == 12
+  def line
+    puts "---------------------------------------------"
+  end
+
+  def welcome_message
+      line
+      puts "Are you ready to play Hangman?"
+      puts "You have 13 tries to guess the right word."
+      puts "The computer will randomly choose a word between 5 - 12 characters."
+      #insert save message
+      line
+  end
+
+  def user_input
+    line
+    puts "Sorry, you can only input one letter."
+    puts "Try again: "
+  end
+
+  def turn
+    puts "Insert guess:"
+  end
+
+  def win
+    line
+    puts "Congratulations! You guessed the word! Want to play again? [Y/n]"
+  end
+
+  def lose
+    line
+    puts "Ouch, it looks like you're out of turns. Want to play again? [Y/n]"
   end
 
 end
+
 
 test = Game.new
 test.play
