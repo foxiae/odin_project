@@ -1,13 +1,16 @@
 class Game
-  def initialize(word_list = Array.new, message = Message.new)
-    @word_list = word_list
+  def initialize
+    @word_list = Array.new
     @words = File.readlines "5desk.txt"
     @guess = ""
+    @guess_collection = Array.new
     @hang_board = Array.new
-    @turn = 0
-    @turn_num = 13
+    @turns_left = 6
     @game_over = false
-    @message = message
+    @message = Message.new
+    @game_count = 0
+    @wins = 0
+    @incr_turn = true #turns false if letter is guessed
   end
 
   def create_word_list
@@ -27,9 +30,11 @@ class Game
 
   def user_input
     @guess = gets.chomp
+    @guess_collection << @guess + ", "
     if @guess.length >= 2
       @message.user_input
       @guess = gets.chomp
+      @guess_collection << @guess + ", "
     end
   end
 
@@ -44,6 +49,7 @@ class Game
       if hang_word.at(i).casecmp(guess) == 0
         @hang_board.delete_at(i)
         @hang_board.insert(i, hang_word.at(i) + " ")
+        @incr_turn = false
       end
     end
   end
@@ -56,29 +62,49 @@ class Game
     @message.turn
     user_input
     check(@guess, @hang_word)
+    incr_turn
+    turn_message
+  end
+
+  def turn_message
     @message.line
-    puts "Your results: " + results
-    @turn += 1
-    puts "You have #{@turn_num-@turn} turns left."
+    puts "     Your results: " + results
+    puts "     Letters guessed: #{@guess_collection.join}"
+    puts "     You have #{@turns_left} turns left."
     @message.line
+  end
+
+  def incr_turn
+    if @incr_turn
+      @turns_left = @turns_left - 1
+    end
+    puts @incr_turn
+    @incr_turn = true
   end
 
   def win
     @message.win
+    @wins += 1
+    stats
     play_again
   end
 
   def lose
+    stats
     @message.lose
+    puts "The correct word was #{@hang_word.join}"
     play_again
   end
 
   def play_again
+    @message.play_again
       answer = gets.chomp
       if answer.casecmp("y") == 0
         new_game
-      else
+      elsif answer.casecmp("n") == 0
         puts "Well, maybe later!"
+      else
+        puts "Enter only y or n."
     end
   end
 
@@ -86,34 +112,51 @@ class Game
     @strip_board = @hang_board.collect{|c| c.strip}
   end
 
+  def stats
+    @message.line
+    puts "You have won #{@wins} out of #{@game_count} games."
+    @message.line
+  end
+
   def new_game
     @hang_board = Array.new
     @strip_board = Array.new
+    @guess_collection = Array.new
+    @game_over = false
+    @turns_left = 6
     play
   end
 
-  def in_game
-    @turn_num.times do
-      if @hang_word == @strip_board
-        win
-        break
-      elsif @turn_num == 0
-        lose
-        break
-      else
-        turn
-        strip_hang_board
-      end
-    end
+  def word_match
+     if @hang_word == @strip_board
+       @game_over = true
+       win
+     end
+  end
 
+  def out_of_turns
+    if @turns_left == 0
+      @game_over = true
+      lose
+    end
+  end
+
+  def in_game
+    until @game_over
+      turn
+      strip_hang_board
+      word_match
+      out_of_turns
+    end
   end
 
   def play
-    @message.welcome_message
+    @message.welcome_message if @game_count == 0
+    @game_count += 1
     create_word_list
     random_word
     hangman_board
-    #puts @hang_word.join
+    puts @hang_word.join
     in_game
   end
 end
@@ -130,7 +173,8 @@ class Message
   def welcome_message
       line
       puts "Are you ready to play Hangman?"
-      puts "You have 13 tries to guess the right word."
+      puts "You have 6 turns to guess the right word."
+      puts "Should you correctly guess the letter, you don't lose a turn."
       puts "The computer will randomly choose a word between 5 - 12 characters."
       #insert save message
       line
@@ -148,14 +192,17 @@ class Message
 
   def win
     line
-    puts "Congratulations! You guessed the word! Want to play again? [Y/n]"
+    puts "Congratulations! You guessed the word!"
   end
 
   def lose
     line
-    puts "Ouch, it looks like you're out of turns. Want to play again? [Y/n]"
+    puts "Ouch, it looks like you're out of turns."
   end
 
+  def play_again
+    puts "Want to play again? [Y/n]"
+  end
 end
 
 
