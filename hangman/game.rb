@@ -1,4 +1,7 @@
+#require yaml
+
 class Game
+
   def initialize
     @word_list = Array.new
     @words = File.readlines "5desk.txt"
@@ -159,6 +162,7 @@ class Game
     puts @hang_word.join
     in_game
   end
+  attr_accessor :wins, :word_list, :hang_word
 end
 
 class Message
@@ -205,6 +209,19 @@ class Message
   end
 end
 
+class Save
+  def initialize
+    @game = Game.new
+  end
+
+  def vartest
+    puts @game.wins
+    puts @hang_word
+  end
+
+end
 
 test = Game.new
 test.play
+test1 = Save.new
+test1.vartest
