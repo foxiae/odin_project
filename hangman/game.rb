@@ -3,32 +3,15 @@
 class Game
 
   def initialize
-    @word_list = Array.new
-    @words = File.readlines "5desk.txt"
+    @message = Message.new
+    @board = Board.new
     @guess = ""
     @guess_collection = Array.new
-    @hang_board = Array.new
     @turns_left = 6
     @game_over = false
-    @message = Message.new
     @game_count = 0
     @wins = 0
     @incr_turn = true #turns false if letter is guessed
-  end
-
-  def create_word_list
-    @words.each do |word|
-      word.strip!
-      if word.length >=5 && word.length <= 12
-        @word_list << word
-      end
-    end
-  end
-
-  def random_word
-    c = Random.new
-    choice = c.rand(0..52453).to_int
-    @hang_word = @word_list[choice].split('')
   end
 
   def user_input
@@ -41,37 +24,27 @@ class Game
     end
   end
 
-  def hangman_board
-    @hang_word.each do |c|
-      @hang_board << " _ "
-    end
-  end
-
   def check(guess, hang_word)
     hang_word.each_index do |i|
       if hang_word.at(i).casecmp(guess) == 0
-        @hang_board.delete_at(i)
-        @hang_board.insert(i, hang_word.at(i) + " ")
+        @board.hang_board.delete_at(i)
+        @board.hang_board.insert(i, hang_word.at(i) + " ")
         @incr_turn = false
       end
     end
   end
 
-  def results
-    @hang_board.join
-  end
-
   def turn
     @message.turn
     user_input
-    check(@guess, @hang_word)
+    check(@guess, @board.hang_board)
     incr_turn
     turn_message
   end
 
   def turn_message
     @message.line
-    puts "     Your results: " + results
+    puts "     Your results: " + @board.results
     puts "     Letters guessed: #{@guess_collection.join}"
     puts "     You have #{@turns_left} turns left."
     @message.line
@@ -95,7 +68,7 @@ class Game
   def lose
     stats
     @message.lose
-    puts "The correct word was #{@hang_word.join}"
+    puts "The correct word was #{@board.hang_word.join}"
     play_again
   end
 
@@ -111,10 +84,6 @@ class Game
     end
   end
 
-  def strip_hang_board
-    @strip_board = @hang_board.collect{|c| c.strip}
-  end
-
   def stats
     @message.line
     puts "You have won #{@wins} out of #{@game_count} games."
@@ -122,16 +91,16 @@ class Game
   end
 
   def new_game
-    @hang_board = Array.new
-    @strip_board = Array.new
+    @board.hang_board = Array.new
+    @board.strip_board = Array.new
     @guess_collection = Array.new
     @game_over = false
     @turns_left = 6
-    play
+    in_game
   end
 
   def word_match
-     if @hang_word == @strip_board
+     if @board.hang_word == @board.strip_board
        @game_over = true
        win
      end
@@ -145,9 +114,11 @@ class Game
   end
 
   def in_game
+    @game_count += 1
+    @board.create_board
     until @game_over
       turn
-      strip_hang_board
+      @board.strip_hang_board
       word_match
       out_of_turns
     end
@@ -156,13 +127,60 @@ class Game
   def play
     @message.welcome_message if @game_count == 0
     @game_count += 1
+    @board.initial_board
+    puts @board.hang_word.join
+    in_game
+  end
+end
+
+class Board
+  attr_accessor :hang_board, :strip_board, :hang_word
+  def initialize
+    @words = File.readlines "5desk.txt"
+    @word_list = Array.new
+    @hang_board = Array.new
+  end
+
+  def create_word_list
+    @words.each do |word|
+      word.strip!
+      if word.length >=5 && word.length <= 12
+        @word_list << word
+      end
+    end
+  end
+
+  def random_word
+    c = Random.new
+    choice = c.rand(0..52453).to_int
+    @hang_word = @word_list[choice].split('')
+  end
+
+  def hangman_board
+    @hang_word.each do |c|
+      @hang_board << " _ "
+    end
+  end
+
+  def results
+    @hang_board.join
+  end
+
+  def strip_hang_board
+    @strip_board = @hang_board.collect{|c| c.strip}
+  end
+
+  def initial_board
     create_word_list
     random_word
     hangman_board
-    puts @hang_word.join
-    in_game
   end
-  attr_accessor :wins, :word_list, :hang_word
+
+  def create_board
+    random_word
+    hangman_board
+  end
+
 end
 
 class Message
