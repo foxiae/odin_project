@@ -25,6 +25,9 @@ class Game
   end
 
   def check(guess, hang_word)
+    puts "Guess: #{guess}"
+    puts "hang word: #{hang_word}"
+    puts "hang board: #{@board.hang_board}"
     hang_word.each_index do |i|
       if hang_word.at(i).casecmp(guess) == 0
         @board.hang_board.delete_at(i)
@@ -37,7 +40,7 @@ class Game
   def turn
     @message.turn
     user_input
-    check(@guess, @board.hang_board)
+    check(@guess, @board.hang_word)
     incr_turn
     turn_message
   end
@@ -91,11 +94,11 @@ class Game
   end
 
   def new_game
-    @board.hang_board = Array.new
-    @board.strip_board = Array.new
     @guess_collection = Array.new
     @game_over = false
     @turns_left = 6
+    @game_count += 1
+    @board.create_board
     in_game
   end
 
@@ -114,8 +117,6 @@ class Game
   end
 
   def in_game
-    @game_count += 1
-    @board.create_board
     until @game_over
       turn
       @board.strip_hang_board
@@ -128,7 +129,6 @@ class Game
     @message.welcome_message if @game_count == 0
     @game_count += 1
     @board.initial_board
-    puts @board.hang_word.join
     in_game
   end
 end
@@ -177,6 +177,8 @@ class Board
   end
 
   def create_board
+    @hang_board = Array.new
+    @strip_board = Array.new
     random_word
     hangman_board
   end
@@ -229,7 +231,7 @@ end
 
 class Save
   def initialize
-    @game = Game.new
+    #@game = Game.new
   end
 
   def vartest
@@ -241,5 +243,3 @@ end
 
 test = Game.new
 test.play
-test1 = Save.new
-test1.vartest
