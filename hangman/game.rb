@@ -1,4 +1,4 @@
-#require yaml
+require 'yaml'
 
 class Game
 
@@ -17,7 +17,16 @@ class Game
   def user_input
     @guess = gets.chomp
     @guess_collection << @guess + ", "
-    if @guess.length >= 2
+    if @guess.casecmp('save') == 0
+      save_game
+      @message.save
+      answer = gets.chomp
+      if answer.casecmp('n') == 0
+        puts "Your current progress is below."
+        puts "See you next time!"
+        @game_over = true
+      end
+    elsif @guess.length >= 2
       @message.user_input
       @guess = gets.chomp
       @guess_collection << @guess + ", "
@@ -125,12 +134,33 @@ class Game
     end
   end
 
-  def play
-    @message.welcome_message if @game_count == 0
+  def start
+    @message.welcome_message
     @game_count += 1
-    @board.initial_board
+    choose_game
     in_game
   end
+
+  def choose_game
+    answer = gets.chomp
+    if answer.casecmp('y') == 0
+      file = File.open("games/saved.yaml")
+      YAML.load(file)
+      file.read
+    elsif answer.casecmp('n') == 0
+      @board.initial_board
+    end
+  end
+
+  def save_game
+      Dir.mkdir("games") unless Dir.exist? "games"
+      @filename = "games/saved.yaml"
+      File.open(filename, "w") do |file|
+          file.puts YAML.dump(self)
+          puts YAML.dump(self)
+      end
+  end
+
 end
 
 class Board
@@ -182,7 +212,6 @@ class Board
     random_word
     hangman_board
   end
-
 end
 
 class Message
@@ -200,8 +229,9 @@ class Message
       puts "You have 6 turns to guess the right word."
       puts "Should you correctly guess the letter, you don't lose a turn."
       puts "The computer will randomly choose a word between 5 - 12 characters."
-      #insert save message
+      puts "Type 'SAVE' to save your progress at the beginning of a turn."
       line
+      puts "Would you like to load a previous game? [Y/n]"
   end
 
   def user_input
@@ -227,6 +257,10 @@ class Message
   def play_again
     puts "Want to play again? [Y/n]"
   end
+
+  def save
+    puts "Your progress has been saved. Do you wish to continue? [Y/n]"
+  end
 end
 
 class Save
@@ -242,4 +276,4 @@ class Save
 end
 
 test = Game.new
-test.play
+test.start
