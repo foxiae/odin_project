@@ -5,20 +5,15 @@ class Game
   def initialize
     @message = Message.new
     @board = Board.new
-    @guess = ""
-    @guess_collection = Array.new
-    @turns_left = 6
-    @game_over = false
-    @game_count = 0
-    @wins = 0
+    @save = Save.new
     @incr_turn = true #turns false if letter is guessed
   end
 
   def user_input
-    @guess = gets.chomp
-    @guess_collection << @guess + ", "
-    if @guess.casecmp('save') == 0
-      save_game
+    @save.guess = gets.chomp
+    @save.guess_collection << @save.guess + ", "
+    if @save.guess.casecmp('save') == 0
+      @save.save_game
       @message.save
       answer = gets.chomp
       if answer.casecmp('n') == 0
@@ -26,21 +21,23 @@ class Game
         puts "See you next time!"
         @game_over = true
       end
-    elsif @guess.length >= 2
+    elsif @save.guess.casecmp('stats') == 0
+      @board.stats
+    elsif @save.guess.length >= 2
       @message.user_input
-      @guess = gets.chomp
-      @guess_collection << @guess + ", "
+      @save.guess = gets.chomp
+      @save.guess_collection << @save.guess + ", "
     end
   end
 
   def check(guess, hang_word)
     puts "Guess: #{guess}"
     puts "hang word: #{hang_word}"
-    puts "hang board: #{@board.hang_board}"
+    puts "hang board: #{@save.hang_board}"
     hang_word.each_index do |i|
       if hang_word.at(i).casecmp(guess) == 0
-        @board.hang_board.delete_at(i)
-        @board.hang_board.insert(i, hang_word.at(i) + " ")
+        @save.hang_board.delete_at(i)
+        @save.hang_board.insert(i, hang_word.at(i) + " ")
         @incr_turn = false
       end
     end
@@ -49,22 +46,22 @@ class Game
   def turn
     @message.turn
     user_input
-    check(@guess, @board.hang_word)
+    check(@save.guess, @save.hang_word)
     incr_turn
-    turn_message
+    turn_result
   end
 
-  def turn_message
+  def turn_result
     @message.line
     puts "     Your results: " + @board.results
-    puts "     Letters guessed: #{@guess_collection.join}"
-    puts "     You have #{@turns_left} turns left."
+    puts "     Letters guessed: #{@save.guess_collection.join}"
+    puts "     You have #{@save.turns_left} turns left."
     @message.line
   end
 
   def incr_turn
     if @incr_turn
-      @turns_left = @turns_left - 1
+      @save.turns_left = @save.turns_left - 1
     end
     puts @incr_turn
     @incr_turn = true
@@ -72,7 +69,7 @@ class Game
 
   def win
     @message.win
-    @wins += 1
+    @save.wins += 1
     stats
     play_again
   end
@@ -80,7 +77,7 @@ class Game
   def lose
     stats
     @message.lose
-    puts "The correct word was #{@board.hang_word.join}"
+    puts "The correct word was #{@save.hang_word.join}"
     play_again
   end
 
@@ -96,30 +93,25 @@ class Game
     end
   end
 
-  def stats
-    @message.line
-    puts "You have won #{@wins} out of #{@game_count} games."
-    @message.line
-  end
 
   def new_game
-    @guess_collection = Array.new
+    @save.guess_collection = Array.new
     @game_over = false
-    @turns_left = 6
-    @game_count += 1
+    @save.turns_left = 6
+    @save.game_count += 1
     @board.create_board
     in_game
   end
 
   def word_match
-     if @board.hang_word == @board.strip_board
+     if @save.hang_word == @board.strip_board
        @game_over = true
        win
      end
   end
 
   def out_of_turns
-    if @turns_left == 0
+    if @save.turns_left == 0
       @game_over = true
       lose
     end
@@ -136,7 +128,8 @@ class Game
 
   def start
     @message.welcome_message
-    @game_count += 1
+    #@save.game_count += 1
+    puts @save.game_count.inspect
     choose_game
     in_game
   end
@@ -144,31 +137,49 @@ class Game
   def choose_game
     answer = gets.chomp
     if answer.casecmp('y') == 0
-      file = File.open("games/saved.yaml")
-      YAML.load(file)
-      file.read
+      @save.load_game
     elsif answer.casecmp('n') == 0
       @board.initial_board
     end
+  end
+end
+
+class Save
+  attr_accessor :guess, :guess_collection, :turns_left, :game_count, :wins, :hang_word, :hang_board
+
+  def initialize
+    @guess = ""
+    @guess_collection = Array.new
+    @turns_left = 6
+    @game_count = 0
+    @wins = 0
+    @hang_word = Array.new
+    @hang_board = Array.new
+  end
+
+  def load_game
+    content = File.open("games/saved.yaml", "r") {|file| file.read}
+    y = YAML.load(content)
+    puts yhang_board
   end
 
   def save_game
       Dir.mkdir("games") unless Dir.exist? "games"
       @filename = "games/saved.yaml"
       File.open(filename, "w") do |file|
-          file.puts YAML.dump(self)
+          file.puts YAML::dump(self)
           puts YAML.dump(self)
       end
   end
-
 end
 
 class Board
   attr_accessor :hang_board, :strip_board, :hang_word
   def initialize
+    @save = Save.new
+    @message = Message.new
     @words = File.readlines "5desk.txt"
     @word_list = Array.new
-    @hang_board = Array.new
   end
 
   def create_word_list
@@ -183,21 +194,21 @@ class Board
   def random_word
     c = Random.new
     choice = c.rand(0..52453).to_int
-    @hang_word = @word_list[choice].split('')
+    @save.hang_word = @word_list[choice].split('')
   end
 
   def hangman_board
-    @hang_word.each do |c|
-      @hang_board << " _ "
+    @save.hang_word.each do |c|
+      @save.hang_board << " _ "
     end
   end
 
   def results
-    @hang_board.join
+    @save.hang_board.join
   end
 
   def strip_hang_board
-    @strip_board = @hang_board.collect{|c| c.strip}
+    @strip_board = @save.hang_board.collect{|c| c.strip}
   end
 
   def initial_board
@@ -207,10 +218,16 @@ class Board
   end
 
   def create_board
-    @hang_board = Array.new
+    @save.hang_board = Array.new
     @strip_board = Array.new
     random_word
     hangman_board
+  end
+
+  def stats
+    @message.line
+    puts "You have won #{@save.wins} out of #{@save.game_count} games."
+    @message.line
   end
 end
 
@@ -230,6 +247,7 @@ class Message
       puts "Should you correctly guess the letter, you don't lose a turn."
       puts "The computer will randomly choose a word between 5 - 12 characters."
       puts "Type 'SAVE' to save your progress at the beginning of a turn."
+      puts "Type 'STATS' to see your current wins!"
       line
       puts "Would you like to load a previous game? [Y/n]"
   end
@@ -270,7 +288,7 @@ class Save
 
   def vartest
     puts @game.wins
-    puts @hang_word
+    puts @save.hang_word
   end
 
 end

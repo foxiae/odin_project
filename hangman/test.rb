@@ -1,58 +1,53 @@
-class Game
-  def initialize
-    @guess = ""
-    @hang_board = Array.new
-    @turn = 0
+require 'yaml'
+
+class Sample
+
+  def initialize(word)
+    @word = word
   end
 
- def random_word
-    @hang_word = "boogers".split('')
+  attr_accessor :word
+
+  def do_something
+    puts "something!"
   end
 
-  def user_input
-    @guess = gets.chomp
-    if @guess.length >= 2
-      puts "Sorry, you can only input one letter."
-      puts "Try again: "
-      @guess = gets.chomp
+  def save
+    Dir.mkdir("saves") unless Dir.exist? "saves"
+    filename = "saves/saved.yaml"
+    File.open(filename, "w") do |file|
+      file.puts YAML.dump(self)
     end
-  end
-
-  def hangman_board
-    @hang_word.each do |c|
-      @hang_board << " _ "
-    end
-  end
-
-  def check(guess, hang_word)
-    @hang_word.each_with_index do |c, i|
-      if @hang_word.at(i) == (@guess)
-        @hang_board.delete_at(i)
-        @hang_board.insert(i, @guess + " ")
-      end
-    end
-  end
-
-  def results
-      @hang_board.join
-  end
-
-  def turn
-     puts "Insert guess:"
-     user_input
-     puts ""
-     check(@guess, @hang_word)
-     puts results
-     @turn += 1
-  end
-
-  def play
-    puts random_word
-    hangman_board
-    5.times{turn}
   end
 
 end
 
-test = Game.new
-test.play
+def load
+    content = File.open("saves/saved.yaml", "r") {|file| file.read}
+    YAML.load(content)
+end
+
+s = Sample.new("poof")
+
+puts "calling directly from class:"
+puts s.word
+puts s.do_something
+puts "s.inspect returns: #{s.inspect}"
+
+puts "saving class as yaml, with the name x"
+x = s.save
+
+puts "x.inspect returns:  #{x.inspect}"
+
+#puts "x.s returns:  #{x.s}" =>this will throw an error
+
+puts "Loading yaml file and assigning it to variable named q"
+q = load
+
+puts "q.inspect returns: #{q.inspect} the same type of object but with a different memory address"
+puts "q.word returns: #{q.word}"
+puts "q.do_something returns: #{q.do_something}"
+
+puts "s.inspect returns: #{s.inspect} the same type of object but with a different memory address"
+puts "s.word returns: #{s.word}"
+puts "s.do_something returns: #{s.do_something}"
