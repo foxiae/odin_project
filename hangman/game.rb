@@ -137,8 +137,6 @@ class Board < Save
   def create_board
     @hang_board = Array.new
     @strip_board = Array.new
-    #random_word
-    #hangman_board
     initial_board
   end
 
@@ -172,6 +170,7 @@ class Turn < Board
       end
     elsif @guess.casecmp('stats') == 0
       stats
+      @incr_turn = false
     elsif @guess.length >= 2
       input_error_mes
       user_input
@@ -179,9 +178,6 @@ class Turn < Board
   end
 
   def check(guess, hang_word)
-    puts "Guess: #{guess}"
-    puts "hang word: #{hang_word}"
-    puts "hang board: #{@hang_board}"
     hang_word.each_index do |i|
       if hang_word.at(i).casecmp(guess) == 0
         @hang_board.delete_at(i)
@@ -211,7 +207,7 @@ class Turn < Board
     user_input
     check(@guess, @hang_word)
     incr_turn
-    turn_result
+    turn_result if @guess.casecmp('stats') != 0
   end
 end
 
@@ -267,8 +263,14 @@ class Play < Turn
       new_game
     elsif answer.casecmp("n") == 0
       puts "Well, maybe later!"
+    elsif answer.casecmp("stats") == 0
+      stats
+      play_again
+    elsif answer.casecmp("save") == 0
+      save_game
+      play_again
     else
-      puts "Enter only y or n."
+      puts "Enter only y or n to play again, or 'STATS'/'SAVE'."
     end
   end
 
