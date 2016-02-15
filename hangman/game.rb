@@ -57,14 +57,46 @@ class Message
   end
 end
 
-class Board < Message
-  attr_accessor :hang_board, :strip_board, :hang_word
+class Save < Message
+  attr_accessor :guess, :guess_collection, :turns_left, :game_count, :wins, :hang_word, :hang_board
+
   def initialize
-    @words = File.readlines "5desk.txt"
     @word_list = Array.new
     @hang_word = Array.new
     @hang_board = Array.new
     @guess_collection = Array.new
+    @incr_turn = true #returns false if letter is guessed
+    @game_over = false
+    @turns_left = 6
+    @game_count = 0
+    @wins = 0
+  end
+
+  def load_game
+    content = File.open("save/past_game.yaml", "r") {|file| file.read}
+    d = YAML.load(content)
+    @hang_word = d.hang_word
+    @hang_board = d.hang_board
+    @game_count = d.game_count
+    @turns_left = d.turns_left
+    @wins = d.wins
+    @guess_collection = d.guess_collection
+  end
+
+  def save_game
+    Dir.mkdir("save") unless Dir.exist? "save"
+    filename = "save/past_game.yaml"
+    File.open(filename, "w") do |file|
+        file.puts YAML::dump(self)
+    end
+  end
+end
+
+class Board < Save
+  attr_accessor :hang_board, :strip_board, :hang_word
+  def initialize
+    @words = File.readlines "5desk.txt"
+    super
   end
 
   def create_word_list
@@ -105,8 +137,9 @@ class Board < Message
   def create_board
     @hang_board = Array.new
     @strip_board = Array.new
-    random_word
-    hangman_board
+    #random_word
+    #hangman_board
+    initial_board
   end
 
   def stats
@@ -119,9 +152,6 @@ end
 class Turn < Board
 
   def initialize
-    @incr_turn = true #returns false if letter is guessed
-    @game_over = false
-    @turns_left = 6
     super
   end
 
@@ -133,7 +163,7 @@ class Turn < Board
 
   def check_input
     if @guess.casecmp('save') == 0
-      @save_game
+      save_game
       save_mes
       answer = gets.chomp
       if answer.casecmp('n') == 0
@@ -188,9 +218,6 @@ end
 class Play < Turn
 
   def initialize
-    @save = Save.new
-    @game_count = 0
-    @wins = 0
     super
   end
 
@@ -204,7 +231,7 @@ class Play < Turn
   def choose_game
     answer = gets.chomp
     if answer.casecmp('y') == 0
-      @load_game
+      load_game
     elsif answer.casecmp('n') == 0
       initial_board
     end
@@ -250,7 +277,7 @@ class Play < Turn
     @game_over = false
     @turns_left = 6
     @game_count += 1
-    @board.create_board
+    create_board
     in_game
   end
 
@@ -266,35 +293,6 @@ class Play < Turn
     lose_mes
     puts "The correct word was #{@hang_word.join}"
     play_again
-  end
-end
-
-class Save
-  attr_accessor :guess, :guess_collection, :turns_left, :game_count, :wins, :hang_word, :hang_board
-
-  def initialize
-    @guess = ""
-    @guess_collection = Array.new
-    @turns_left = 6
-    @game_count = 0
-    @wins = 0
-    @hang_word = Array.new
-    @hang_board = Array.new
-  end
-
-  def load_game
-    content = File.open("games/saved.yaml", "r") {|file| file.read}
-    y = YAML.load(content)
-    puts yhang_board
-  end
-
-  def save_game
-      Dir.mkdir("games") unless Dir.exist? "games"
-      @filename = "games/saved.yaml"
-      File.open(filename, "w") do |file|
-          file.puts YAML::dump(self)
-          puts YAML.dump(self)
-      end
   end
 end
 
